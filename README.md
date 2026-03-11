@@ -76,6 +76,10 @@ This plugin is a PoC made to test the CameraAPI plugin and the `selection-visual
 
 ##### Create a mine (`/afkmineadmin create`)
 
+
+https://github.com/user-attachments/assets/a9c53a70-d87a-40ec-95f9-35a549908171
+
+
 1. Your inventory will be replaced with creation tools.
 2. Touch blocks / use items to set positions:
    - Ore spot tools (slot 1–3): add/remove ore spots by preset (Stone/Nether/Deepslate)
@@ -88,6 +92,10 @@ This plugin is a PoC made to test the CameraAPI plugin and the `selection-visual
    - ore regen interval (ticks)
 
 ##### Join AFK mining (`/afkmine`)
+
+
+https://github.com/user-attachments/assets/45000b04-ac09-4758-82d7-6aa991598f5a
+
 
 - Start/stop an AFK session in an available mine.
 - Rewards are settled every `reward-interval` seconds.

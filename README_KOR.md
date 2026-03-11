@@ -76,6 +76,10 @@
 
 ##### 광산 생성 (`/afkmineadmin create`)
 
+
+https://github.com/user-attachments/assets/a9c53a70-d87a-40ec-95f9-35a549908171
+
+
 1. 명령어 실행 시 인벤토리가 생성 도구들로 교체됩니다.
 2. 블럭을 터치하거나 아이템을 사용하여 위치를 지정합니다.
    - 광물 포인트(슬롯 1~3): 프리셋(Stone/Nether/Deepslate)별 광물 포인트 추가/제거
@@ -88,6 +92,10 @@
    - 광물 리젠 주기(틱)
 
 ##### AFK 채굴 입장/퇴장 (`/afkmine`)
+
+
+https://github.com/user-attachments/assets/45000b04-ac09-4758-82d7-6aa991598f5a
+
 
 - 사용 가능한 광산에서 AFK 세션을 시작/종료합니다.
 - 보상은 `reward-interval` 초마다 정산됩니다.
