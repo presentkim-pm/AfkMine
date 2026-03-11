@@ -39,9 +39,16 @@ jobs:
       - name: Download PresentKim/pmmp-plugin-build.php
         run: wget -O .github/workflows/pmmp-plugin-build.php https://raw.githubusercontent.com/PresentKim/scripts-for-action/main/pmmp-plugin-build.php
 
+      - name: Download presentkim-pm/play-sound-utils/prune-vanilla-play-sounds-phar.php.php
+        run: wget -O .github/workflows/prune-vanilla-play-sounds-phar.php https://raw.githubusercontent.com/presentkim-pm/play-sound-utils/main/tools/prune-vanilla-play-sounds-phar.php
+
       - name: Build plugin with virion infecting
         if: steps.cache-releases.outputs.cache-hit != 'true'
         run: php -dphar.readonly=0 .github/workflows/pmmp-plugin-build.php ${{ env.RELEASE_DIR }}
+
+      - name: Prune unused VanillaPlaySounds entries
+        if: steps.cache-releases.outputs.cache-hit != 'true'
+        run: php -dphar.readonly=0 .github/workflows/prune-vanilla-play-sounds-phar.php ${{ env.RELEASE_DIR }}/.releases
 
       - name: Force update tag release
         if: steps.cache-releases.outputs.cache-hit != 'true'

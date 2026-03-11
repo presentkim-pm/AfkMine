@@ -1,0 +1,42 @@
+#############################
+# AFKMine default settings
+#############################
+
+# Reward settlement interval (seconds)
+# - How often to give the drops mined by the dummy miner to the player.
+reward-interval: 10
+
+# Maximum number of items per settlement
+# - If 0 or less, all items are given without limit.
+reward-max-items-per-tick: 0
+
+#############################
+# Movement detection / AFK end
+#############################
+
+# Grace period after AFK starts during which movement does not trigger the exit confirmation (seconds)
+movement-grace-seconds: 3.0
+
+# Minimum movement distance to detect (blocks)
+# - Movement smaller than this value is ignored.
+movement-min-distance: 0.1
+
+#############################
+# Camera settings
+#############################
+
+# When moving the camera between points and the miner,
+# the maximum ratio toward the miner position (0.0 ~ 1.0).
+camera-offset-max: 0.6
+
+# Time to stay at each camera point (seconds)
+camera-hold-seconds: 5.0
+
+#############################
+# AFK session timeout
+#############################
+
+# Maximum AFK duration (seconds)
+# - If 0 or less, there is no time limit.
+max-afk-seconds: 0
+

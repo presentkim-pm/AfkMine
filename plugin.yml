@@ -1,8 +1,29 @@
 ---
-name: PluginName
-main: kim\present\pluginname\Main
+name: AFKMine
+main: kim\present\afkmine\Main
 version: 0.0.1
 api: [ 5.0.0 ]
 author: PresentKim
-description: Description of Plugin
+description: Immersive AFK mining that a cinematic viewing experience
+depend: [ CameraAPI ]
+
+virions:
+  - selection-visualize-utils/1.2.0
+  - play-sound-utils/3.0.0
+  - libmultilingual/1.2.0
+
+commands:
+  afkmineadmin:
+    description: "Manage AFK mine"
+    permission: afkmine.command.admin
+    aliases: [ama]
+  afkmine:
+    description: "Using AFK mine"
+    permission: afkmine.command.user
+
+permissions:
+  afkmine.command.admin:
+    default: op
+  afkmine.command.user:
+    default: true
 ...
