@@ -8,9 +8,11 @@ description: Immersive AFK mining that a cinematic viewing experience
 depend: [ CameraAPI ]
 
 virions:
+  - session-utils/1.0.0
   - selection-visualize-utils/1.2.0
   - play-sound-utils/3.0.0
   - libmultilingual/1.2.0
+  - player-state-backup/1.0.0
 
 commands:
   afkmineadmin:

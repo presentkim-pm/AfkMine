@@ -29,21 +29,27 @@ namespace kim\present\afkmine\session;
 
 use kim\present\afkmine\data\Mine;
 use kim\present\afkmine\data\MineManager;
+use kim\present\afkmine\form\ModalForm;
 use kim\present\afkmine\Main;
 use kim\present\cameraapi\Camera;
 use kim\present\cameraapi\session\CameraSession;
+use kim\present\utils\session\AbstractSession;
+use kim\present\utils\session\listener\attribute\SessionEventHandler;
+use kim\present\utils\session\SessionManager;
+use kim\present\utils\session\SessionTerminateReasons;
+use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\player\Player;
-use pocketmine\utils\TextFormat;
 use pocketmine\world\Position;
 
-class AFKSession{
+final class AFKSession extends AbstractSession{
 
     private Main $plugin;
-    private Player $player;
     private ?Mine $mine = null;
 
-    private Position $originalPos;
-    private bool $isFlying;
+    private ?Position $originalPos = null;
+    private bool $isFlying = false;
+    private bool $entered = false;
+    private bool $confirmingExit = false;
 
     private int $rewardTick = 0;
     private int $rewardInterval;
@@ -51,54 +57,63 @@ class AFKSession{
 
     private float $maxAfkUntil = 0.0;
 
-    /** @var float 잠수 시작 후 일정 시간(초)까지는 이동 확인 폼을 띄우지 않기 위한 기준 시각 */
     private float $movementGraceUntil = 0.0;
 
-    public function __construct(Main $plugin, Player $player){
-        $this->plugin = $plugin;
-        $this->player = $player;
+    /**
+     * @param SessionManager $manager The manager that owns this session.
+     * @param Player         $player  The operator entering creation mode.
+     */
+    public function __construct(SessionManager $manager, Player $player){
+        parent::__construct($manager, $player);
+        $this->plugin = Main::getInstance();
 
         $config = $this->plugin->getPluginConfig();
         $this->rewardInterval = $config->rewardIntervalTicks;
         $this->rewardMaxItemsPerTick = $config->rewardMaxItemsPerTick;
     }
 
-    public function start() : bool{
-        $this->mine = MineManager::getInstance()->getRandomAvailableMineFor($this->player->getName());
+    protected function onStart() : void{
+        $player = $this->getPlayer();
+        $playerName = $player->getName();
+
+        $this->mine = MineManager::getInstance()->getRandomAvailableMineFor($playerName);
         if($this->mine === null || !$this->mine->data->isValid()){
-            $this->player->sendMessage(
-                $this->plugin->translate("afkmine.afk.noMine", [], $this->player)
-            );
-            return false;
+            $player->sendMessage($this->plugin->translate("afkmine.afk.noMine", [], $player));
+            $this->terminate(SessionTerminateReasons::START_FAILED);
+            return;
         }
 
-        if(!$this->mine->occupy($this->player->getName())){
-            $this->player->sendMessage(
-                $this->plugin->translate("afkmine.afk.occupied", [], $this->player)
-            );
-            return false;
+        if(!$this->mine->occupy($playerName)){
+            $player->sendMessage($this->plugin->translate("afkmine.afk.occupied", [], $player));
+            $this->terminate(SessionTerminateReasons::START_FAILED);
+            return;
         }
 
         if($this->mine->getMiner() === null){
-            $this->player->sendMessage(
-                $this->plugin->translate("afkmine.afk.initializing", [], $this->player)
-            );
-            return false;
+            $player->sendMessage($this->plugin->translate("afkmine.afk.initializing", [], $player));
+            $this->mine->release($playerName);
+            $this->terminate(SessionTerminateReasons::START_FAILED);
+            return;
         }
 
-        $this->originalPos = $this->player->getPosition();
-        $this->isFlying = $this->player->isFlying();
+        $this->originalPos = $player->getPosition();
+        $this->isFlying = $player->isFlying();
 
-        // Teleport to Hide Pos
         $hidePos = $this->mine->data->hidePos;
         if($hidePos === null){
-            return false;
+            $this->mine->release($playerName);
+            $this->terminate(SessionTerminateReasons::START_FAILED);
+            return;
         }
+
         $world = $this->plugin->getServer()->getWorldManager()->getWorldByName($this->mine->data->worldName);
         if($world === null){
-            return false;
+            $this->mine->release($playerName);
+            $this->terminate(SessionTerminateReasons::START_FAILED);
+            return;
         }
-        $this->player->setFlying(true);
+
+        $player->setFlying(true);
 
         $config = $this->plugin->getPluginConfig();
         if($config->maxAfkSeconds > 0){
@@ -109,23 +124,22 @@ class AFKSession{
 
         $this->movementGraceUntil = microtime(true) + $config->movementGraceSeconds;
 
-        // Apply cinematic camera and teleport player to the hidden position
         Camera::timeline()
               ->add(fn(CameraSession $session) => $this->mine->getInitCameraTimeline()->play($session))
               ->wait(3.0)
               ->add(fn(CameraSession $session) => $this->mine->getLoopCameraTimeline()->play($session))
-              ->play($this->player);
+              ->play($player);
 
-        $this->player->teleport(new Position($hidePos->x, $hidePos->y, $hidePos->z, $world));
+        $player->teleport(new Position($hidePos->x, $hidePos->y, $hidePos->z, $world));
+        $this->entered = true;
 
-        $this->player->sendMessage($this->plugin->translate("afkmine.afk.started", [], $this->player));
-        $this->player->sendMessage($this->plugin->translate("afkmine.afk.hint.moveToExit", [], $this->player));
-        $this->player->sendMessage($this->plugin->translate("afkmine.afk.hint.rewardInfo", [], $this->player));
-        return true;
+        $player->sendMessage($this->plugin->translate("afkmine.afk.started", [], $player));
+        $player->sendMessage($this->plugin->translate("afkmine.afk.hint.moveToExit", [], $player));
+        $player->sendMessage($this->plugin->translate("afkmine.afk.hint.rewardInfo", [], $player));
     }
 
     /**
-     * 잠수 시작 후 이동 확인 폼을 무시해야 하는 그레이스 기간인지 여부를 반환한다.
+     * Returns whether movement checks should be ignored briefly after session start.
      */
     public function isInMovementGracePeriod() : bool{
         return microtime(true) < $this->movementGraceUntil;
@@ -139,26 +153,26 @@ class AFKSession{
         }
 
         if($this->maxAfkUntil > 0.0 && microtime(true) >= $this->maxAfkUntil){
-            $this->plugin->removeAFKSession($this->player);
-            $this->player->sendMessage(
-                $this->plugin->translate("afkmine.afk.maxTimeEnded", [], $this->player)
-            );
+            $player = $this->getPlayer();
+            $player->sendMessage($this->plugin->translate("afkmine.afk.maxTimeEnded", [], $player));
+            $this->terminate(SessionTerminateReasons::TIMEOUT);
         }
     }
 
     private function giveReward() : void{
-        if($this->mine === null){
+        if($this->mine === null || !$this->isActive()){
             return;
         }
 
-        $drops = $this->mine->takePendingDropsFor($this->player->getName(), $this->rewardMaxItemsPerTick);
+        $player = $this->getPlayer();
+        $drops = $this->mine->takePendingDropsFor($player->getName(), $this->rewardMaxItemsPerTick);
         if($drops === []){
             return;
         }
 
-        $inventory = $this->player->getInventory();
-        $world = $this->player->getWorld();
-        $position = $this->player->getPosition();
+        $inventory = $player->getInventory();
+        $world = $player->getWorld();
+        $position = $player->getPosition();
 
         $totalCount = 0;
         $totalKinds = 0;
@@ -179,25 +193,65 @@ class AFKSession{
         }
 
         if($totalKinds > 0){
-            $this->player->sendTip(
-                $this->plugin->translate("afkmine.afk.rewardTip", ["0" => (string) $totalCount], $this->player)
+            $player->sendTip(
+                $this->plugin->translate("afkmine.afk.rewardTip", ["0" => (string) $totalCount], $player)
             );
         }
     }
 
-    public function stop() : void{
-        // Reset camera back to default view
-        Camera::of($this->player)->stop()->clear();
-
-        if($this->mine !== null){
-            $this->mine->release($this->player->getName());
+    #[SessionEventHandler(PlayerMoveEvent::class)]
+    public function onMove(PlayerMoveEvent $event) : void{
+        if($this->isInMovementGracePeriod()){
+            return;
         }
 
-        $this->player->teleport($this->originalPos);
-        $this->player->setFlying($this->isFlying);
+        $from = $event->getFrom();
+        $to = $event->getTo();
+        $minDistanceSq = $this->plugin->getPluginConfig()->movementMinDistanceSquared;
+        if($from->distanceSquared($to) < $minDistanceSq){
+            return;
+        }
 
-        $this->player->sendMessage(
-            $this->plugin->translate("afkmine.afk.stopped", [], $this->player)
+        $event->cancel();
+        if($this->confirmingExit){
+            return;
+        }
+
+        $player = $this->getPlayer();
+        if(!$player instanceof Player){
+            return;
+        }
+
+        $this->confirmingExit = true;
+        $form = new ModalForm(
+            $this->plugin->translate("afkmine.afk.exit.title", [], $player),
+            $this->plugin->translate("afkmine.afk.exit.content", [], $player),
+            $this->plugin->translate("afkmine.afk.exit.yes", [], $player),
+            $this->plugin->translate("afkmine.afk.exit.no", [], $player),
+            function(Player $player, $data) : void{
+                $this->confirmingExit = false;
+                if($data === true){
+                    $this->terminate("manual_exit");
+                }
+            }
         );
+        $player->sendForm($form);
+    }
+
+    protected function onTerminate(string $reason) : void{
+        $player = $this->getPlayer();
+        Camera::of($player)->stop()->clear();
+
+        $this->mine?->release($player->getName());
+
+        if($this->entered && $this->originalPos instanceof Position){
+            $player->teleport($this->originalPos);
+            $player->setFlying($this->isFlying);
+            $player->sendMessage($this->plugin->translate("afkmine.afk.stopped", [], $player));
+        }
+
+        $this->entered = false;
+        $this->confirmingExit = false;
+        $this->mine = null;
     }
 }

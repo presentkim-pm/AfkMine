@@ -26,7 +26,7 @@
 
 ## About The Project
 
-이 플러그인은 CameraAPI 플러그인 및 `selection-visualize-utils`, `play-sound-utils` virion의 테스트를 위해 만들어진 PoC 플러그인입니다.
+이 플러그인은 CameraAPI 플러그인 및 virion들의 테스트를 위해 만들어진 PoC 플러그인입니다.
 
 :heavy_check_mark: 인게임에서 자동 광산 생성  
 :heavy_check_mark: 카메라 경로를 통해 더미 광부의 채굴을 시네마틱하게 감상  
@@ -51,9 +51,11 @@
 
 - **CameraAPI** (플러그인 의존성)
 - 이 플러그인이 사용하는 virion:
+  - `session-utils`
   - `selection-visualize-utils`
   - `play-sound-utils`
   - `libmultilingual`
+  - `player-state-backup`
 
 ##
 

@@ -26,7 +26,7 @@
 
 ## About The Project
 
-This plugin is a PoC made to test the CameraAPI plugin and the `selection-visualize-utils`, `play-sound-utils` virions.
+This plugin is a PoC made to test the CameraAPI plugin and the virions.
 
 :heavy_check_mark: Create AFK mines in-game  
 :heavy_check_mark: Watch a dummy miner mining ores via a cinematic camera path  
@@ -51,9 +51,11 @@ This plugin is a PoC made to test the CameraAPI plugin and the `selection-visual
 
 - **CameraAPI** (plugin dependency)
 - Virions used by this plugin:
+  - `session-utils`
   - `selection-visualize-utils`
   - `play-sound-utils`
   - `libmultilingual`
+  - `player-state-backup`
 
 ##
 
