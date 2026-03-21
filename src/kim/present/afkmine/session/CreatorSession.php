@@ -37,8 +37,8 @@ use kim\present\cameraapi\session\CameraSession;
 use kim\present\playerbackup\PlayerStateBackupRegistry;
 use kim\present\utils\playsound\VanillaPlaySounds as Sounds;
 use kim\present\utils\selectionvisualize\PreviewEntry;
-use kim\present\utils\session\AbstractSession;
 use kim\present\utils\session\listener\attribute\SessionEventHandler;
+use kim\present\utils\session\Session;
 use kim\present\utils\session\SessionManager;
 use kim\present\utils\session\SessionTerminateReasons;
 use pocketmine\block\utils\DyeColor;
@@ -70,7 +70,7 @@ use pocketmine\world\World;
  * - {@link onInteract()}: Places ore spots, spawn point, or hide point by right-clicking.
  * - {@link onItemUse()}: Adds camera points or triggers save flow via held item.
  */
-final class CreatorSession extends AbstractSession{
+final class CreatorSession extends Session{
 
     /**
      * NBT key used to tag creation tool items.

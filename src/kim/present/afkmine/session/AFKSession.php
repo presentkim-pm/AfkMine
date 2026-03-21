@@ -33,15 +33,15 @@ use kim\present\afkmine\form\ModalForm;
 use kim\present\afkmine\Main;
 use kim\present\cameraapi\Camera;
 use kim\present\cameraapi\session\CameraSession;
-use kim\present\utils\session\AbstractSession;
 use kim\present\utils\session\listener\attribute\SessionEventHandler;
+use kim\present\utils\session\Session;
 use kim\present\utils\session\SessionManager;
 use kim\present\utils\session\SessionTerminateReasons;
 use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\player\Player;
 use pocketmine\world\Position;
 
-final class AFKSession extends AbstractSession{
+final class AFKSession extends Session{
 
     private Main $plugin;
     private ?Mine $mine = null;
