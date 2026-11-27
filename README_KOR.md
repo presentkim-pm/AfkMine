@@ -2,6 +2,7 @@
 <div align="center">
 
 ![Version][version-badge]
+[![Downloads][release-badge]][releases-url]
 [![Stars][stars-badge]][stars-url]
 [![License][license-badge]][license-url]
 
@@ -26,7 +27,7 @@
 
 ## About The Project
 
-이 플러그인은 CameraAPI 플러그인 및 virion들의 테스트를 위해 만들어진 PoC 플러그인입니다.
+이 플러그인은 CameraAPI 플러그인 및 presentkim Composer 라이브러리들의 테스트를 위해 만들어진 PoC 플러그인입니다.
 
 :heavy_check_mark: 인게임에서 자동 광산 생성  
 :heavy_check_mark: 카메라 경로를 통해 더미 광부의 채굴을 시네마틱하게 감상  
@@ -40,8 +41,11 @@
 
 #### 요구사항
 
-- PocketMine-MP **5.x**
-- PHP **8.2**
+- [axolotl-pm/PocketMine-MP](https://github.com/axolotl-pm/PocketMine-MP) **5.51** 이상 (`plugin.yml` `api: [5.51.0]`),
+  BedrockProtocol 64 (Bedrock `1.26.60`) 사용
+- PHP **8.4** 이상
+- 기존 [pmmp/PocketMine-MP](https://github.com/pmmp/PocketMine-MP) 5.x용 버전은
+  [`legacy/pmmp-5.44`](https://github.com/presentkim-pm/AfkMine/tree/legacy/pmmp-5.44) 브랜치에 보관되어 있습니다
 
 ##
 
@@ -50,12 +54,11 @@
 #### 의존성
 
 - **CameraAPI** (플러그인 의존성)
-- 이 플러그인이 사용하는 virion:
-  - `session-utils`
-  - `selection-visualize-utils`
-  - `play-sound-utils`
-  - `libmultilingual`
-  - `player-state-backup`
+- 이 플러그인이 사용하는 Composer 라이브러리 (릴리스 phar에 포함되므로 따로 설치할 필요 없음):
+  - `presentkim/session-utils`
+  - `presentkim/selection-visualize-utils`
+  - `presentkim/play-sound-utils`
+  - `presentkim/libmultilingual`
 
 ##
 
@@ -156,9 +159,12 @@ https://github.com/user-attachments/assets/45000b04-ac09-4758-82d7-6aa991598f5a
 
 ## 설치
 
-1) 플러그인 `.phar` 릴리스를 다운로드 (또는 PoC 테스트 목적이라면 소스 설치)
-2) 다운로드한 `.phar` 파일을 서버의 **/plugins/** 폴더에 이동
-3) 서버 재시작
+1) [CameraAPI](https://github.com/presentkim-pm/CameraAPI) `2.0` 플러그인을 설치
+2) [GitHub Releases][releases-url]에서 `AFKMine.phar`를 다운로드
+3) 다운로드한 `.phar` 파일을 서버의 **/plugins/** 폴더에 이동
+4) 서버 재시작
+
+개발 시에는 `composer install` 후 `composer test`로 PHPUnit 테스트를 실행할 수 있습니다.
 
 ##
 
@@ -166,7 +172,7 @@ https://github.com/user-attachments/assets/45000b04-ac09-4758-82d7-6aa991598f5a
 
 ## License
 
-자세한 내용은 레포지토리의 라이선스 파일을 확인해주세요.
+LGPL-3.0-or-later. 자세한 내용은 레포지토리의 [라이선스 파일][license-url]을 확인해주세요.
 
 ##
 
@@ -176,7 +182,10 @@ https://github.com/user-attachments/assets/45000b04-ac09-4758-82d7-6aa991598f5a
 [stars-badge]: https://img.shields.io/github/stars/presentkim-pm/AfkMine.svg?style=for-the-badge
 [license-badge]: https://img.shields.io/github/license/presentkim-pm/AfkMine.svg?style=for-the-badge
 
+[release-badge]: https://img.shields.io/github/downloads/presentkim-pm/AfkMine/total?style=for-the-badge&label=GITHUB%20
+
 [stars-url]: https://github.com/presentkim-pm/AfkMine/stargazers
+[releases-url]: https://github.com/presentkim-pm/AfkMine/releases
 [issues-url]: https://github.com/presentkim-pm/AfkMine/issues
 [license-url]: https://github.com/presentkim-pm/AfkMine/blob/main/LICENSE
 

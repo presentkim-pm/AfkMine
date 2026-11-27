@@ -2,6 +2,7 @@
 <div align="center">
 
 ![Version][version-badge]
+[![Downloads][release-badge]][releases-url]
 [![Stars][stars-badge]][stars-url]
 [![License][license-badge]][license-url]
 
@@ -26,7 +27,7 @@
 
 ## About The Project
 
-This plugin is a PoC made to test the CameraAPI plugin and the virions.
+This plugin is a PoC made to test the CameraAPI plugin and the presentkim Composer libraries.
 
 :heavy_check_mark: Create AFK mines in-game  
 :heavy_check_mark: Watch a dummy miner mining ores via a cinematic camera path  
@@ -40,8 +41,11 @@ This plugin is a PoC made to test the CameraAPI plugin and the virions.
 
 #### Requirements
 
-- PocketMine-MP **5.x**
-- PHP **8.2**
+- [axolotl-pm/PocketMine-MP](https://github.com/axolotl-pm/PocketMine-MP) **5.51** or higher (`plugin.yml` `api: [5.51.0]`),
+  which uses BedrockProtocol 64 (Bedrock `1.26.60`)
+- PHP **8.4** or higher
+- The version for the original [pmmp/PocketMine-MP](https://github.com/pmmp/PocketMine-MP) 5.x is kept on the
+  [`legacy/pmmp-5.44`](https://github.com/presentkim-pm/AfkMine/tree/legacy/pmmp-5.44) branch
 
 ##
 
@@ -50,12 +54,11 @@ This plugin is a PoC made to test the CameraAPI plugin and the virions.
 #### Dependencies
 
 - **CameraAPI** (plugin dependency)
-- Virions used by this plugin:
-  - `session-utils`
-  - `selection-visualize-utils`
-  - `play-sound-utils`
-  - `libmultilingual`
-  - `player-state-backup`
+- Composer libraries used by this plugin (bundled into the released phar, nothing to install):
+  - `presentkim/session-utils`
+  - `presentkim/selection-visualize-utils`
+  - `presentkim/play-sound-utils`
+  - `presentkim/libmultilingual`
 
 ##
 
@@ -157,9 +160,12 @@ returns to its previous state instead of leaving regenerated ores/base blocks be
 
 ## Installation
 
-1) Download plugin `.phar` releases (or install from source for PoC testing)
-2) Move downloaded `.phar` file to server's **/plugins/** folder
-3) Restart the server
+1) Install the [CameraAPI](https://github.com/presentkim-pm/CameraAPI) `2.0` plugin
+2) Download `AFKMine.phar` from [GitHub Releases][releases-url]
+3) Move the downloaded `.phar` file to the server's **/plugins/** folder
+4) Restart the server
+
+For development, `composer install` then `composer test` runs the PHPUnit tests.
 
 ##
 
@@ -167,7 +173,7 @@ returns to its previous state instead of leaving regenerated ores/base blocks be
 
 ## License
 
-See the repository license file for more information.
+LGPL-3.0-or-later. See the repository [license file][license-url] for more information.
 
 ##
 
@@ -177,7 +183,10 @@ See the repository license file for more information.
 [stars-badge]: https://img.shields.io/github/stars/presentkim-pm/AfkMine.svg?style=for-the-badge
 [license-badge]: https://img.shields.io/github/license/presentkim-pm/AfkMine.svg?style=for-the-badge
 
+[release-badge]: https://img.shields.io/github/downloads/presentkim-pm/AfkMine/total?style=for-the-badge&label=GITHUB%20
+
 [stars-url]: https://github.com/presentkim-pm/AfkMine/stargazers
+[releases-url]: https://github.com/presentkim-pm/AfkMine/releases
 [issues-url]: https://github.com/presentkim-pm/AfkMine/issues
 [license-url]: https://github.com/presentkim-pm/AfkMine/blob/main/LICENSE
 
