@@ -37,7 +37,6 @@ use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\item\VanillaItems;
 use pocketmine\math\Vector3;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\NetworkBroadcastUtils;
 use pocketmine\network\mcpe\protocol\AnimateEntityPacket;
 use pocketmine\network\mcpe\protocol\LevelEventPacket;
@@ -324,7 +323,9 @@ class MinerEntity extends Entity implements NeverSavedWithChunkEntity{
 
         $pk = MobEquipmentPacket::create(
             $this->getId(),
-            ItemStackWrapper::legacy(TypeConverter::getInstance()->coreItemStackToNet(VanillaItems::DIAMOND_PICKAXE())),
+            ItemStackWrapper::legacy(
+                $player->getNetworkSession()->getTypeConverter()->coreItemStackToNet(VanillaItems::DIAMOND_PICKAXE())
+            ),
             0, 0, 0
         );
         $player->getNetworkSession()->sendDataPacket($pk);

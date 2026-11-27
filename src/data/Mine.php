@@ -40,7 +40,6 @@ use pocketmine\block\utils\DyeColor;
 use pocketmine\entity\Location;
 use pocketmine\item\Item;
 use pocketmine\math\Vector3;
-use pocketmine\network\mcpe\protocol\types\camera\CameraSetInstructionEaseType as EaseType;
 use pocketmine\Server;
 
 class Mine{
@@ -240,7 +239,7 @@ class Mine{
             Camera::timeline()
                   ->set(fn(CameraSetBuilder $b) => $b
                       ->preset(CameraPresetRegistry::PRESET_FREE)
-                      ->position($this->data->cameraPoints[0])
+                      ->position(array_values($this->data->cameraPoints)[0])
                   )
                   ->target(fn(CameraTargetBuilder $b) => $b->entity($this->getMiner()))
                   ->fade(fn(CameraFadeBuilder $b) => $b
@@ -268,7 +267,7 @@ class Mine{
         }
 
         $indices = range(0, $count - 1);
-        if($count >= 2){
+        if($count >= 3){
             $back = range($count - 2, 1);
             $indices = array_merge($indices, $back);
         }
@@ -289,23 +288,8 @@ class Mine{
                 ->wait(0.5)
                 ->set(fn(CameraSetBuilder $b) => $b
                     ->preset(CameraPresetRegistry::PRESET_FREE)
-                    ->position((function() use ($points, $index, $maxOffsetRatio){
-                        $base = $points[$index];
-
-                        $miner = $this->getMiner();
-                        if($miner === null){
-                            return $base;
-                        }
-
-                        $minerVec = $miner->getLocation()->asVector3();
-
-                        // 0.0 ~ $maxOffsetRatio ratio toward miner position
-                        $max = (int) round($maxOffsetRatio * 100);
-                        $factor = mt_rand(0, $max) / 100;
-                        $offset = $minerVec->subtractVector($base)->multiply($factor);
-
-                        return $base->addVector($offset);
-                    })())
+                    // Evaluated each time the step plays, so every pass picks a new offset toward the current miner.
+                    ->position($this->getOffsetCameraPosition($points[$index], $maxOffsetRatio))
                 );
         }
 
@@ -313,5 +297,21 @@ class Mine{
         $timeline->setLoop();
 
         return $this->loopCameraTimeline = $timeline;
+    }
+
+    /**
+     * Moves the camera point randomly toward the miner by 0.0 ~ $maxOffsetRatio of the distance between them.
+     */
+    private function getOffsetCameraPosition(Vector3 $base, float $maxOffsetRatio) : Vector3{
+        $miner = $this->getMiner();
+        if($miner === null){
+            return $base;
+        }
+
+        $max = (int) round($maxOffsetRatio * 100);
+        $factor = mt_rand(0, max(0, $max)) / 100;
+        $offset = $miner->getLocation()->asVector3()->subtractVector($base)->multiply($factor);
+
+        return $base->addVector($offset);
     }
 }

@@ -1,0 +1,40 @@
+{
+  "name": "presentkim/afkmine",
+  "description": "Immersive AFK mining with a cinematic camera experience for axolotl-pm/PocketMine-MP",
+  "type": "project",
+  "license": "LGPL-3.0-or-later",
+  "require": {
+    "php": "^8.4",
+    "presentkim/libmultilingual": "^2.0",
+    "presentkim/play-sound-utils": "^4.0",
+    "presentkim/selection-visualize-utils": "^2.0",
+    "presentkim/session-utils": "^2.0"
+  },
+  "require-dev": {
+    "axolotl-pm/pocketmine-mp": "^5.51",
+    "phpunit/phpunit": "^12.0",
+    "presentkim/cameraapi": "^2.0"
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/presentkim-pm/CameraAPI"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "kim\\present\\afkmine\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "kim\\present\\afkmine\\tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "phpunit"
+  },
+  "config": {
+    "sort-packages": true
+  }
+}

@@ -35,7 +35,6 @@ use kim\present\libmultilingual\traits\MultilingualConfigTrait;
 use kim\present\libmultilingual\traits\MultilingualPluginModifiableTrait;
 use kim\present\utils\selectionvisualize\BlockPreview;
 use kim\present\utils\session\SessionManager;
-use kim\present\utils\session\SessionTerminateReasons;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
@@ -80,11 +79,6 @@ class Main extends PluginBase{
                 $session->tick();
             }
         }), 1);
-    }
-
-    protected function onDisable() : void{
-        $this->afkSessionManager->terminateAll(SessionTerminateReasons::PLUGIN_DISABLE);
-        $this->creatorSessionManager->terminateAll(SessionTerminateReasons::PLUGIN_DISABLE);
     }
 
     public function onCommand(CommandSender $sender, Command $command, string $label, array $args) : bool{

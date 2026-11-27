@@ -92,7 +92,7 @@ class MineData implements \JsonSerializable{
             'worldName' => $this->worldName,
             'oreSpots' => array_map(fn(OreSpotEntry $entry) => $entry->preset->getId(), $this->oreSpots),
             'originalBlockStates' => $this->originalBlockStates,
-            'cameraPoints' => array_map($this->vecToArr(...), $this->cameraPoints),
+            'cameraPoints' => array_values(array_map($this->vecToArr(...), $this->cameraPoints)),
             'spawnPos' => $this->spawnPos !== null ? $this->vecToArr($this->spawnPos) : null,
             'hidePos' => $this->hidePos !== null ? $this->vecToArr($this->hidePos) : null,
             'regenInterval' => $this->regenInterval
@@ -172,10 +172,10 @@ class MineData implements \JsonSerializable{
             }
         }
 
-        $mine->cameraPoints = array_map([self::class, 'arrToVec'], $data['cameraPoints'] ?? []);
+        $mine->cameraPoints = array_values(array_map([self::class, 'arrToVec'], $data['cameraPoints'] ?? []));
         $mine->spawnPos = isset($data['spawnPos']) ? self::arrToVec($data['spawnPos']) : null;
         $mine->hidePos = isset($data['hidePos']) ? self::arrToVec($data['hidePos']) : null;
-        $mine->regenInterval = $data['regenInterval'] ?? 100;
+        $mine->regenInterval = max(1, (int) ($data['regenInterval'] ?? 100));
         return $mine;
     }
 

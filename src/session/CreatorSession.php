@@ -34,7 +34,6 @@ use kim\present\afkmine\Main;
 use kim\present\cameraapi\Camera;
 use kim\present\cameraapi\marker\CameraMarker;
 use kim\present\cameraapi\session\CameraSession;
-use kim\present\playerbackup\PlayerStateBackupRegistry;
 use kim\present\utils\playsound\VanillaPlaySounds as Sounds;
 use kim\present\utils\selectionvisualize\PreviewEntry;
 use kim\present\utils\session\listener\attribute\SessionEventHandler;
@@ -101,8 +100,12 @@ final class CreatorSession extends Session{
 
     private Main $plugin;
 
-    /** Manages backup and restoration of the player's inventory around the session. */
-    private PlayerStateBackupRegistry $backupRegistry;
+    /**
+     * The player's inventory contents backed up when the session starts, restored when it terminates.
+     *
+     * @var array<int, Item>|null
+     */
+    private ?array $backupContents = null;
 
     /**
      * Mutable mine configuration being built during this session.
@@ -125,7 +128,6 @@ final class CreatorSession extends Session{
     public function __construct(SessionManager $manager, Player $player){
         parent::__construct($manager, $player);
         $this->plugin = Main::getInstance();
-        $this->backupRegistry = new PlayerStateBackupRegistry();
         $this->tempData = new MineData("", $player->getWorld()->getFolderName());
     }
 
@@ -140,7 +142,10 @@ final class CreatorSession extends Session{
      * - Slot 8: Save / confirm
      */
     protected function onStart() : void{
-        $this->backupRegistry->captureInventoryOnly($this->player);
+        $this->backupContents = array_map(
+            static fn(Item $item) : Item => clone $item,
+            $this->player->getInventory()->getContents()
+        );
         $this->player->getInventory()->clearAll();
 
         $inv = $this->player->getInventory();
@@ -227,13 +232,15 @@ final class CreatorSession extends Session{
     protected function onTerminate(string $reason) : void{
         $player = $this->getPlayer();
         $this->plugin->getBlockPreview()->clear($player);
-        $this->backupRegistry->restoreAndForget($player);
+        if($this->backupContents !== null){
+            $player->getInventory()->setContents($this->backupContents);
+            $this->backupContents = null;
+        }
 
         foreach($this->cameraMarkers as $marker){
             $marker->remove();
         }
         $this->cameraMarkers = [];
-        $this->backupRegistry->clear();
     }
 
     /**
@@ -525,8 +532,8 @@ final class CreatorSession extends Session{
                 "max" => 60,
                 "default" => 20
             ]
-        ], function(Player $p, $data){
-            if($data === null){
+        ], function(Player $p, mixed $data) : void{
+            if(!is_array($data)){
                 return;
             }
             $name = $data[0];
@@ -538,6 +545,7 @@ final class CreatorSession extends Session{
             }
 
             $this->tempData->name = $name;
+            $this->tempData->cameraPoints = array_values($this->tempData->cameraPoints);
             $this->tempData->regenInterval = (int) ($data[1] ?? 20);
 
             MineManager::getInstance()->saveMine($this->tempData);
